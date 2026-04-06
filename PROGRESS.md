@@ -81,7 +81,9 @@
 > - The `folderId` key is omitted entirely (not `null`) for ungrouped items — JS `!item.folderId` handles both `null` and `undefined` as falsy
 > - `"tabs"` permission added alongside `"activeTab"` to ensure `browser.tabs.sendMessage` works in Safari
 
-- **Checkpoint:** ✅ End-to-end verified — right-click any input on any site, select FFill item, field populates correctly including folder submenus.
+- [x] Fix service worker termination bug — `formData` now persisted to `browser.storage.local`; restored on SW wake-up before processing click events; `"storage"` permission added to manifest
+
+- **Checkpoint:** ✅ End-to-end verified — right-click any input on any site, select FFill item, field populates correctly including folder submenus. Verified working after 2+ minutes of inactivity (SW termination).
 
 ## Phase 6: Settings & Polish
 - [ ] Build `SettingsView` with extension enable instructions
