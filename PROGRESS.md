@@ -30,14 +30,20 @@
 > **Note:** Bundle ID is `vanija-dev.FFill`, extension bundle ID is `vanija-dev.FFill.Extension`. Team: Ivan Solomichev (Personal Team). The template generated AppDelegate + Storyboard — conversion to SwiftUI App lifecycle will happen in Phase 2.
 
 ## Phase 2: Data Models
-- [ ] Create `Constants.swift` with App Group ID
-- [ ] Create `FormItem.swift` SwiftData model
-- [ ] Create `Folder.swift` SwiftData model with relationship to FormItem
-- [ ] Create `SharedContainer.swift` — shared ModelContainer factory
-- [ ] Set target membership of model files to both targets (in Xcode)
-- [ ] Wire up `FFillApp.swift` with shared model container
-- [ ] **Tests:** Unit tests for FormItem and Folder CRUD, relationships, sortOrder
-- **Checkpoint:** Build in Xcode to verify models compile. Review model design together.
+
+> **Implementation notes:**
+> - Replace `AppDelegate.swift` + `Main.storyboard` + `ViewController.swift` with `FFillApp.swift` (SwiftUI `@main struct FFillApp: App`) — the template generated the old lifecycle, Phase 2 converts it
+> - Model files (`FormItem.swift`, `Folder.swift`, `SharedContainer.swift`, `Constants.swift`) must have target membership on **both** the `FFill` app target AND the `FFill Extension` target — without this the extension cannot access the models
+> - `SharedContainer` must set an explicit file URL inside the App Group container directory (`FileManager.containerURL(forSecurityApplicationGroupIdentifier:)`), NOT the default location — otherwise app and extension will use separate, isolated databases and the extension will see no data
+
+- [x] Create `Constants.swift` with App Group ID (`FFill/FFill/Utilities/Constants.swift`)
+- [x] Create `FormItem.swift` SwiftData model (`FFill/FFill/Models/FormItem.swift`)
+- [x] Create `Folder.swift` SwiftData model (`FFill/FFill/Models/Folder.swift`)
+- [x] Create `SharedContainer.swift` — shared ModelContainer factory using explicit App Group URL (`FFill/FFill/Models/SharedContainer.swift`)
+- [x] Set target membership of model files to both targets (FFill + FFill Extension) — verified via File Inspector
+- [x] Replace AppDelegate/Storyboard with `FFillApp.swift` (SwiftUI App lifecycle) + placeholder `ContentView.swift`; deleted AppDelegate.swift, ViewController.swift, Main.storyboard, and template web resources
+- [x] **Tests:** Unit tests for FormItem and Folder CRUD, relationships, sortOrder - 16/16 passing (`FFillTests/FFillTests.swift`)
+- **Checkpoint:** Build verified ✅ — project compiles. All 16 model tests pass.
 
 ## Phase 3: App UI (CRUD)
 - [ ] Build `SidebarView` with navigation links (Form Data, Folders, Settings)
