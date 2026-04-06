@@ -46,16 +46,17 @@
 - **Checkpoint:** Build verified ✅ — project compiles. All 16 model tests pass.
 
 ## Phase 3: App UI (CRUD)
-- [ ] Build `SidebarView` with navigation links (Form Data, Folders, Settings)
-- [ ] Build `ContentView` with NavigationSplitView
-- [ ] Build `FormDataListView` — list all items, delete support
-- [ ] Build `FormItemRowView` — display row with key + value preview
-- [ ] Build `FormItemEditorView` — add/edit items (key, value, folder picker)
-- [ ] Build `FolderListView` — list all folders, delete support
-- [ ] Build `FolderRowView` — display folder row
-- [ ] Build `FolderEditorView` — add/edit folders
-- [ ] Build `FolderDetailView` — show items in a folder
-- **Checkpoint:** Run the app in Xcode. Add/edit/delete items and folders. Review UI together.
+- [x] Build `SidebarView` with navigation links (Form Data, Folders, Settings)
+- [x] Build `ContentView` with NavigationSplitView (2-column: sidebar + NavigationStack detail)
+- [x] Build `FormDataListView` — list all items with add/edit/delete + empty state
+- [x] Build `FormItemRowView` — key (bold) + value preview + folder badge (capsule)
+- [x] Build `FormItemEditorView` — sheet: key, value (multi-line), folder picker, rich-text toggle
+- [x] Build `FolderListView` — list all folders with add/edit/delete + drill-in via NavigationLink
+- [x] Build `FolderRowView` — folder name + item count
+- [x] Build `FolderEditorView` — sheet: folder name
+- [x] Build `FolderDetailView` — items in folder with edit/delete; empty state placeholder
+- [x] Add `SettingsView` placeholder (full implementation Phase 6)
+- **Checkpoint:** Build verified ✅ — project compiles. Run the app to test CRUD.
 
 ## Phase 4: Drag-and-Drop Reordering
 - [ ] Add `.onMove` to FormDataListView with sortOrder update logic
