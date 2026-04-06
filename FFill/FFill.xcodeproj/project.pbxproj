@@ -18,6 +18,13 @@
 			remoteGlobalIDString = 4F8C56332F80270300EA7A51;
 			remoteInfo = "FFill Extension";
 		};
+		4F8C56792F841A2500EA7A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F8C56122F8026FF00EA7A51 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F8C56192F8026FF00EA7A51;
+			remoteInfo = FFill;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +48,7 @@
 		4F8C565A2F80300800EA7A51 /* PROGRESS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = PROGRESS.md; path = ../PROGRESS.md; sourceTree = SOURCE_ROOT; };
 		4F8C565B2F80300800EA7A51 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = SOURCE_ROOT; };
 		4F8C565C2F80300800EA7A51 /* USER_JOURNEY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = USER_JOURNEY.md; path = ../USER_JOURNEY.md; sourceTree = SOURCE_ROOT; };
+		4F8C56752F841A2500EA7A51 /* FFillTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FFillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -51,11 +59,24 @@
 			);
 			target = 4F8C56332F80270300EA7A51 /* FFill Extension */;
 		};
+		4F8C566D2F84188C00EA7A51 /* Exceptions for "FFill" folder in "FFill Extension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/Folder.swift,
+				Models/FormItem.swift,
+				Models/SharedContainer.swift,
+				Utilities/Constants.swift,
+			);
+			target = 4F8C56332F80270300EA7A51 /* FFill Extension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4F8C561C2F8026FF00EA7A51 /* FFill */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4F8C566D2F84188C00EA7A51 /* Exceptions for "FFill" folder in "FFill Extension" target */,
+			);
 			path = FFill;
 			sourceTree = "<group>";
 		};
@@ -69,6 +90,11 @@
 				Resources/images,
 			);
 			path = "FFill Extension";
+			sourceTree = "<group>";
+		};
+		4F8C56762F841A2500EA7A51 /* FFillTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FFillTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -88,6 +114,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4F8C56722F841A2500EA7A51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -100,6 +133,7 @@
 				4F8C565C2F80300800EA7A51 /* USER_JOURNEY.md */,
 				4F8C561C2F8026FF00EA7A51 /* FFill */,
 				4F8C56382F80270300EA7A51 /* FFill Extension */,
+				4F8C56762F841A2500EA7A51 /* FFillTests */,
 				4F8C561B2F8026FF00EA7A51 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,6 +143,7 @@
 			children = (
 				4F8C561A2F8026FF00EA7A51 /* FFill.app */,
 				4F8C56342F80270300EA7A51 /* FFill Extension.appex */,
+				4F8C56752F841A2500EA7A51 /* FFillTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -162,6 +197,29 @@
 			productReference = 4F8C56342F80270300EA7A51 /* FFill Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		4F8C56742F841A2500EA7A51 /* FFillTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F8C567B2F841A2500EA7A51 /* Build configuration list for PBXNativeTarget "FFillTests" */;
+			buildPhases = (
+				4F8C56712F841A2500EA7A51 /* Sources */,
+				4F8C56722F841A2500EA7A51 /* Frameworks */,
+				4F8C56732F841A2500EA7A51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F8C567A2F841A2500EA7A51 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4F8C56762F841A2500EA7A51 /* FFillTests */,
+			);
+			name = FFillTests;
+			packageProductDependencies = (
+			);
+			productName = FFillTests;
+			productReference = 4F8C56752F841A2500EA7A51 /* FFillTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -177,6 +235,10 @@
 					};
 					4F8C56332F80270300EA7A51 = {
 						CreatedOnToolsVersion = 26.4;
+					};
+					4F8C56742F841A2500EA7A51 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 4F8C56192F8026FF00EA7A51;
 					};
 				};
 			};
@@ -196,6 +258,7 @@
 			targets = (
 				4F8C56192F8026FF00EA7A51 /* FFill */,
 				4F8C56332F80270300EA7A51 /* FFill Extension */,
+				4F8C56742F841A2500EA7A51 /* FFillTests */,
 			);
 		};
 /* End PBXProject section */
@@ -209,6 +272,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4F8C56322F80270300EA7A51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F8C56732F841A2500EA7A51 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,6 +302,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4F8C56712F841A2500EA7A51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -239,6 +316,11 @@
 			isa = PBXTargetDependency;
 			target = 4F8C56332F80270300EA7A51 /* FFill Extension */;
 			targetProxy = 4F8C56362F80270300EA7A51 /* PBXContainerItemProxy */;
+		};
+		4F8C567A2F841A2500EA7A51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F8C56192F8026FF00EA7A51 /* FFill */;
+			targetProxy = 4F8C56792F841A2500EA7A51 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -262,7 +344,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -299,7 +381,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -521,6 +603,46 @@
 			};
 			name = Release;
 		};
+		4F8C567C2F841A2500EA7A51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M867F8MR7A;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "vanija-dev.FFillTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FFill.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FFill";
+			};
+			name = Debug;
+		};
+		4F8C567D2F841A2500EA7A51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M867F8MR7A;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "vanija-dev.FFillTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FFill.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FFill";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -547,6 +669,15 @@
 			buildConfigurations = (
 				4F8C56552F80270300EA7A51 /* Debug */,
 				4F8C56562F80270300EA7A51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F8C567B2F841A2500EA7A51 /* Build configuration list for PBXNativeTarget "FFillTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F8C567C2F841A2500EA7A51 /* Debug */,
+				4F8C567D2F841A2500EA7A51 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
