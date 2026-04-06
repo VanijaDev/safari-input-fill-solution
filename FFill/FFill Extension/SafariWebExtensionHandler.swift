@@ -2,7 +2,12 @@
 //  SafariWebExtensionHandler.swift
 //  FFill Extension
 //
-//  Created by Ivan Solomichev on 4/3/26.
+//  Handles native messages from the Safari Web Extension.
+//  Receives { action: "getFormData" } and responds with all FormItems and Folders
+//  read from the shared SwiftData store via ExtensionDataService.
+//
+//  NOTE: beginRequest runs on a background thread. ExtensionDataService creates
+//  a fresh ModelContext per call — never share a ModelContext across threads.
 //
 
 import SafariServices
@@ -12,31 +17,38 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     func beginRequest(with context: NSExtensionContext) {
         let request = context.inputItems.first as? NSExtensionItem
+        let message = request?.userInfo?[SFExtensionMessageKey] as? [String: Any]
 
-        let profile: UUID?
-        if #available(iOS 17.0, macOS 14.0, *) {
-            profile = request?.userInfo?[SFExtensionProfileKey] as? UUID
-        } else {
-            profile = request?.userInfo?["profile"] as? UUID
+        os_log(.default, "FFill Extension received message: %@", String(describing: message))
+
+        guard let action = message?["action"] as? String, action == "getFormData" else {
+            complete(context: context, success: false, error: "Unknown or missing action")
+            return
         }
 
-        let message: Any?
-        if #available(iOS 15.0, macOS 11.0, *) {
-            message = request?.userInfo?[SFExtensionMessageKey]
-        } else {
-            message = request?.userInfo?["message"]
+        do {
+            let payload = try ExtensionDataService.buildResponsePayload()
+            complete(context: context, success: true, data: payload)
+        } catch {
+            os_log(.error, "FFill Extension failed to fetch data: %@", error.localizedDescription)
+            complete(context: context, success: false, error: error.localizedDescription)
         }
-
-        os_log(.default, "Received message from browser.runtime.sendNativeMessage: %@ (profile: %@)", String(describing: message), profile?.uuidString ?? "none")
-
-        let response = NSExtensionItem()
-        if #available(iOS 15.0, macOS 11.0, *) {
-            response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
-        } else {
-            response.userInfo = [ "message": [ "echo": message ] ]
-        }
-
-        context.completeRequest(returningItems: [ response ], completionHandler: nil)
     }
 
+    // MARK: - Helpers
+
+    private func complete(
+        context: NSExtensionContext,
+        success: Bool,
+        data: [String: Any]? = nil,
+        error: String? = nil
+    ) {
+        var responseMessage: [String: Any] = ["success": success]
+        if let data { responseMessage["data"] = data }
+        if let error { responseMessage["error"] = error }
+
+        let response = NSExtensionItem()
+        response.userInfo = [SFExtensionMessageKey: responseMessage]
+        context.completeRequest(returningItems: [response], completionHandler: nil)
+    }
 }

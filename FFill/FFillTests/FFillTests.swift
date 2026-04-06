@@ -273,6 +273,124 @@ struct RelationshipTests {
     }
 }
 
+// MARK: - ExtensionDataService Tests
+
+@Suite("ExtensionDataService")
+struct ExtensionDataServiceTests {
+
+    @Test("empty store returns empty arrays")
+    func emptyStore() throws {
+        let container = try makeTestContainer()
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+
+        let items = try #require(payload["items"] as? [[String: Any]])
+        let folders = try #require(payload["folders"] as? [[String: Any]])
+        #expect(items.isEmpty)
+        #expect(folders.isEmpty)
+    }
+
+    @Test("ungrouped items serialised without folderId key")
+    func ungroupedItemsHaveNoFolderIdKey() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        context.insert(FormItem(key: "First Name", value: "John", sortOrder: 0))
+        context.insert(FormItem(key: "Email", value: "john@example.com", sortOrder: 1))
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let items = try #require(payload["items"] as? [[String: Any]])
+
+        #expect(items.count == 2)
+        // Ungrouped items must NOT have a folderId key at all
+        #expect(items[0]["folderId"] == nil)
+        #expect(items[1]["folderId"] == nil)
+        #expect(items[0]["key"] as? String == "First Name")
+        #expect(items[1]["key"] as? String == "Email")
+    }
+
+    @Test("items are returned sorted by sortOrder")
+    func itemsSortedBySortOrder() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        context.insert(FormItem(key: "C", value: "", sortOrder: 2))
+        context.insert(FormItem(key: "A", value: "", sortOrder: 0))
+        context.insert(FormItem(key: "B", value: "", sortOrder: 1))
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let items = try #require(payload["items"] as? [[String: Any]])
+
+        #expect(items.map { $0["key"] as? String } == ["A", "B", "C"])
+    }
+
+    @Test("folder item with assigned folder includes folderId")
+    func assignedItemIncludesFolderId() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let folder = Folder(name: "Work", sortOrder: 0)
+        let item = FormItem(key: "Work Email", value: "w@work.com", sortOrder: 0)
+        item.folder = folder
+        context.insert(folder)
+        context.insert(item)
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let items = try #require(payload["items"] as? [[String: Any]])
+        let folders = try #require(payload["folders"] as? [[String: Any]])
+
+        #expect(items.count == 1)
+        let folderId = try #require(items[0]["folderId"] as? String)
+        #expect(folderId == folder.id.uuidString)
+
+        #expect(folders.count == 1)
+        #expect(folders[0]["name"] as? String == "Work")
+        let itemIds = try #require(folders[0]["itemIds"] as? [String])
+        #expect(itemIds == [item.id.uuidString])
+    }
+
+    @Test("folder itemIds are in sortOrder")
+    func folderItemIdsAreSorted() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let folder = Folder(name: "Personal", sortOrder: 0)
+        let item0 = FormItem(key: "A", value: "", sortOrder: 0)
+        let item1 = FormItem(key: "B", value: "", sortOrder: 1)
+        let item2 = FormItem(key: "C", value: "", sortOrder: 2)
+        item0.folder = folder
+        item1.folder = folder
+        item2.folder = folder
+        context.insert(folder)
+        [item0, item1, item2].forEach { context.insert($0) }
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let folders = try #require(payload["folders"] as? [[String: Any]])
+        let itemIds = try #require(folders[0]["itemIds"] as? [String])
+
+        #expect(itemIds == [item0.id.uuidString, item1.id.uuidString, item2.id.uuidString])
+    }
+
+    @Test("multiple folders returned sorted by sortOrder")
+    func foldersSortedBySortOrder() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        context.insert(Folder(name: "Z", sortOrder: 2))
+        context.insert(Folder(name: "A", sortOrder: 0))
+        context.insert(Folder(name: "M", sortOrder: 1))
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let folders = try #require(payload["folders"] as? [[String: Any]])
+
+        #expect(folders.map { $0["name"] as? String } == ["A", "M", "Z"])
+    }
+}
+
 // MARK: - SortOrder Reordering Tests
 
 /// Mirrors the move logic used in FormDataListView, FolderListView, and FolderDetailView.

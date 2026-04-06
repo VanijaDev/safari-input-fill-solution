@@ -62,6 +62,7 @@
 		4F8C566D2F84188C00EA7A51 /* Exceptions for "FFill" folder in "FFill Extension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Models/ExtensionDataService.swift,
 				Models/Folder.swift,
 				Models/FormItem.swift,
 				Models/SharedContainer.swift,

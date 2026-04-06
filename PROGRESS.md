@@ -18,7 +18,7 @@
 
 ---
 
-## Phase 1: Project Scaffolding (COMPLETED)
+## Phase 1: Project Scaffolding ✅
 > *Done manually in Xcode with Claude guidance.*
 
 - [x] Create Xcode project via Safari Extension App template (macOS, Safari Web Extension, Swift)
@@ -29,7 +29,7 @@
 
 > **Note:** Bundle ID is `vanija-dev.FFill`, extension bundle ID is `vanija-dev.FFill.Extension`. Team: Ivan Solomichev (Personal Team). The template generated AppDelegate + Storyboard — conversion to SwiftUI App lifecycle will happen in Phase 2.
 
-## Phase 2: Data Models
+## Phase 2: Data Models ✅
 
 > **Implementation notes:**
 > - Replace `AppDelegate.swift` + `Main.storyboard` + `ViewController.swift` with `FFillApp.swift` (SwiftUI `@main struct FFillApp: App`) — the template generated the old lifecycle, Phase 2 converts it
@@ -45,7 +45,7 @@
 - [x] **Tests:** Unit tests for FormItem and Folder CRUD, relationships, sortOrder - 16/16 passing (`FFillTests/FFillTests.swift`)
 - **Checkpoint:** Build verified ✅ — project compiles. All 16 model tests pass.
 
-## Phase 3: App UI (CRUD)
+## Phase 3: App UI (CRUD) ✅
 - [x] Build `SidebarView` with navigation links (Form Data, Folders, Settings)
 - [x] Build `ContentView` with NavigationSplitView (2-column: sidebar + NavigationStack detail)
 - [x] Build `FormDataListView` — list all items with add/edit/delete + empty state
@@ -58,22 +58,30 @@
 - [x] Add `SettingsView` placeholder (full implementation Phase 6)
 - **Checkpoint:** Build verified ✅ — project compiles. Run the app to test CRUD.
 
-## Phase 4: Drag-and-Drop Reordering
+## Phase 4: Drag-and-Drop Reordering ✅
 - [x] Add `.onMove` to FormDataListView with sortOrder update logic
 - [x] Add `.onMove` to FolderListView with sortOrder update logic
 - [x] Add `.onMove` to FolderDetailView with sortOrder update logic
 - [x] **Tests:** 5 new tests in `SortOrderReorderingTests` suite — 21/21 passing total
 - **Checkpoint:** Build verified ✅ — all tests pass. Run app to drag items and verify order persists.
 
-## Phase 5: Safari Web Extension
-- [ ] Implement `SafariWebExtensionHandler.swift` — handle `getFormData` action
-- [ ] Write `manifest.json` with contextMenus + nativeMessaging permissions
-- [ ] Write `background.js` — native message fetch, menu building, click handling
-- [ ] Write `content.js` — field filling with native setter trick
-- [ ] **Tests:** Unit tests for SafariWebExtensionHandler (mock request/response)
-- [ ] **Tests:** JS tests for background.js menu tree construction
-- [ ] **Tests:** JS tests for content.js field filling logic
-- **Checkpoint:** Enable extension in Safari, right-click an input field, fill it. Full end-to-end test.
+## Phase 5: Safari Web Extension ✅
+- [x] Implement `SafariWebExtensionHandler.swift` — delegates to `ExtensionDataService.buildResponsePayload()`, handles unknown actions with error response
+- [x] Create `ExtensionDataService.swift` (dual target: FFill + FFill Extension) — serializes SwiftData models to JSON-compatible dict; extracted for unit testability without importing SafariServices
+- [x] Write `manifest.json` — added `contextMenus`, `activeTab`, `tabs`, `nativeMessaging` permissions; changed `content_scripts.matches` from `*://example.com/*` to `<all_urls>`; added `run_at: document_idle`
+- [x] Write `background.js` — fetches native data on `onInstalled`/`onStartup`; builds context menu tree (FFill root → ungrouped items → separator → folder submenus); sends `fillField` to content.js on click
+- [x] Write `content.js` — tracks right-clicked element via `contextmenu` event; fills using native setter trick (`Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set`) for React/Vue/Angular compatibility; dispatches `input` + `change` events
+- [x] **Tests:** 6 new `ExtensionDataServiceTests` — empty store, ungrouped items (no folderId key), sortOrder, folderId presence, folder itemIds order, multi-folder sort — 27/27 passing total
+- [ ] **Tests:** JS tests for background.js / content.js (require external test runner — deferred to Phase 7)
+
+> **Notes:**
+> - `ExtensionDataService.swift` must have target membership on both `FFill` and `FFill Extension` — without this the extension won't compile
+> - Safari requires explicit "Allow on All Websites" permission for content script injection — without this, the context menu appears but filling doesn't work
+> - Both `export` keywords were removed from `buildMenus()` (background.js) and `fillField()` (content.js) — content scripts cannot be ES modules in MV3; background.js is a module but exports serve no purpose at runtime
+> - The `folderId` key is omitted entirely (not `null`) for ungrouped items — JS `!item.folderId` handles both `null` and `undefined` as falsy
+> - `"tabs"` permission added alongside `"activeTab"` to ensure `browser.tabs.sendMessage` works in Safari
+
+- **Checkpoint:** ✅ End-to-end verified — right-click any input on any site, select FFill item, field populates correctly including folder submenus.
 
 ## Phase 6: Settings & Polish
 - [ ] Build `SettingsView` with extension enable instructions
