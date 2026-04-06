@@ -2,23 +2,46 @@
 //
 // Responsibilities:
 //   1. On install/startup, fetch FormItems + Folders from the native app via native messaging.
-//   2. Build a "FFill" context menu tree:
+//   2. Persist fetched data to browser.storage.local so it survives service worker termination.
+//   3. Build a "FFill" context menu tree:
 //        FFill (root)
 //          ├── ungrouped items (no folder)
 //          ├── ── separator (if both ungrouped items and folders exist)
 //          └── folder submenus → their items
-//   3. On context menu item click, send { action: "fillField", value } to the active tab's content.js.
+//   4. On context menu item click, restore data from storage if the SW was terminated,
+//      then send { action: "fillField", value } to the active tab's content.js.
+//
+// MV3 service workers are terminated after ~30s of inactivity. All in-memory state is
+// lost on termination. Context menu entries persist (stored by Safari), but formData
+// does not — hence the storage.local round-trip.
 
 const APP_BUNDLE_ID = "vanija-dev.FFill";
+const STORAGE_KEY = "ffillFormData";
 
-// In-memory cache of the last-fetched data
+// In-memory cache — populated on startup and restored from storage on wake-up.
 let formData = { items: [], folders: [] };
+
+// ── Storage helpers ───────────────────────────────────────────────────────────
+
+async function saveToStorage() {
+    await browser.storage.local.set({ [STORAGE_KEY]: formData });
+}
+
+/** Restores formData from storage. Returns true if data was found. */
+async function restoreFromStorage() {
+    const result = await browser.storage.local.get(STORAGE_KEY);
+    if (result[STORAGE_KEY]) {
+        formData = result[STORAGE_KEY];
+        return true;
+    }
+    return false;
+}
 
 // ── Native messaging ──────────────────────────────────────────────────────────
 
 /**
  * Ask the native Swift app for all FormItems and Folders.
- * On success, caches the data and rebuilds the context menu tree.
+ * On success: caches in memory, persists to storage, rebuilds context menus.
  */
 async function fetchFormData() {
     try {
@@ -29,9 +52,10 @@ async function fetchFormData() {
 
         if (response?.success && response.data) {
             formData = response.data;
+            await saveToStorage();
             await rebuildMenus();
         } else {
-            console.error("FFill: native app returned failure", response?.error ?? "(no error detail)");
+            console.error("FFill: native app returned failure", response?.error ?? "(no detail)");
         }
     } catch (err) {
         console.error("FFill: sendNativeMessage error", err);
@@ -40,10 +64,6 @@ async function fetchFormData() {
 
 // ── Context menu management ───────────────────────────────────────────────────
 
-/**
- * Remove all existing FFill menus, then rebuild from current formData.
- * Returns a Promise so callers can await completion.
- */
 function rebuildMenus() {
     return new Promise((resolve) => {
         browser.contextMenus.removeAll(() => {
@@ -53,14 +73,10 @@ function rebuildMenus() {
     });
 }
 
-/**
- * Construct the full context menu tree from formData.
- * Exported for unit testing (ESM).
- */
 function buildMenus() {
     const { items, folders } = formData;
 
-    // Root entry — always created, even when empty, so users see "FFill" in the menu
+    // Root entry — always created so users see "FFill" in the menu
     browser.contextMenus.create({
         id: "ffill-root",
         title: "FFill",
@@ -112,9 +128,18 @@ function buildMenus() {
 
 // ── Context menu click handling ───────────────────────────────────────────────
 
-browser.contextMenus.onClicked.addListener((info, tab) => {
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
     const menuItemId = String(info.menuItemId);
     if (!menuItemId.startsWith("ffill-item-")) return;
+
+    // Service worker may have been terminated and formData reset to empty.
+    // Restore from storage.local first; fall back to a native fetch if storage is also empty.
+    if (formData.items.length === 0) {
+        const restored = await restoreFromStorage();
+        if (!restored) {
+            await fetchFormData();
+        }
+    }
 
     const itemId = menuItemId.replace("ffill-item-", "");
     const item = formData.items.find(i => i.id === itemId);
@@ -128,6 +153,6 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
-// Fetch on first install and each time the service worker wakes up
+// Fetch fresh data from native on first install and each Safari startup.
 browser.runtime.onInstalled.addListener(() => fetchFormData());
 browser.runtime.onStartup.addListener(() => fetchFormData());
