@@ -102,7 +102,7 @@ struct FormItemTests {
         context.insert(FormItem(key: "B", value: "", sortOrder: 1))
         try context.save()
 
-        var descriptor = FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)])
+        let descriptor = FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)])
         let fetched = try context.fetch(descriptor)
         #expect(fetched.map(\.key) == ["A", "B", "C"])
     }
