@@ -59,11 +59,11 @@
 - **Checkpoint:** Build verified ✅ — project compiles. Run the app to test CRUD.
 
 ## Phase 4: Drag-and-Drop Reordering
-- [ ] Add `.onMove` to FormDataListView with sortOrder update logic
-- [ ] Add `.onMove` to FolderListView with sortOrder update logic
-- [ ] Add drag-and-drop for items within FolderDetailView
-- [ ] **Tests:** Unit tests for sortOrder recalculation after move
-- **Checkpoint:** Run the app, drag items around, verify order persists after relaunch.
+- [x] Add `.onMove` to FormDataListView with sortOrder update logic
+- [x] Add `.onMove` to FolderListView with sortOrder update logic
+- [x] Add `.onMove` to FolderDetailView with sortOrder update logic
+- [x] **Tests:** 5 new tests in `SortOrderReorderingTests` suite — 21/21 passing total
+- **Checkpoint:** Build verified ✅ — all tests pass. Run app to drag items and verify order persists.
 
 ## Phase 5: Safari Web Extension
 - [ ] Implement `SafariWebExtensionHandler.swift` — handle `getFormData` action

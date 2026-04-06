@@ -3,11 +3,12 @@
 //  FFillTests
 //
 //  Unit tests for FormItem and Folder SwiftData models.
-//  Covers: CRUD, relationships, sortOrder.
+//  Covers: CRUD, relationships, sortOrder, drag-and-drop reordering.
 //
 
 import Testing
 import Foundation
+import SwiftUI
 import SwiftData
 @testable import FFill
 
@@ -269,5 +270,128 @@ struct RelationshipTests {
 
         let fetchedItem = try context.fetch(FetchDescriptor<FormItem>())
         #expect(fetchedItem[0].folder == nil)
+    }
+}
+
+// MARK: - SortOrder Reordering Tests
+
+/// Mirrors the move logic used in FormDataListView, FolderListView, and FolderDetailView.
+private func applyMove<T: AnyObject & Identifiable>(
+    to array: inout [T],
+    from source: IndexSet,
+    to destination: Int,
+    updateSortOrder: (T, Int) -> Void
+) {
+    array.move(fromOffsets: source, toOffset: destination)
+    for (index, item) in array.enumerated() {
+        updateSortOrder(item, index)
+    }
+}
+
+@Suite("SortOrder Reordering")
+struct SortOrderReorderingTests {
+
+    // MARK: FormItem reordering
+
+    @Test("move first item to last — sortOrders reassigned correctly")
+    func moveFirstToLast() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let a = FormItem(key: "A", value: "", sortOrder: 0)
+        let b = FormItem(key: "B", value: "", sortOrder: 1)
+        let c = FormItem(key: "C", value: "", sortOrder: 2)
+        [a, b, c].forEach { context.insert($0) }
+        try context.save()
+
+        var list = [a, b, c]
+        applyMove(to: &list, from: IndexSet(integer: 0), to: 3) { $0.sortOrder = $1 }
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)]))
+        #expect(fetched.map(\.key) == ["B", "C", "A"])
+        #expect(fetched.map(\.sortOrder) == [0, 1, 2])
+    }
+
+    @Test("move last item to first — sortOrders reassigned correctly")
+    func moveLastToFirst() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let a = FormItem(key: "A", value: "", sortOrder: 0)
+        let b = FormItem(key: "B", value: "", sortOrder: 1)
+        let c = FormItem(key: "C", value: "", sortOrder: 2)
+        [a, b, c].forEach { context.insert($0) }
+        try context.save()
+
+        var list = [a, b, c]
+        applyMove(to: &list, from: IndexSet(integer: 2), to: 0) { $0.sortOrder = $1 }
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)]))
+        #expect(fetched.map(\.key) == ["C", "A", "B"])
+        #expect(fetched.map(\.sortOrder) == [0, 1, 2])
+    }
+
+    @Test("move middle item up — sortOrders reassigned correctly")
+    func moveMiddleUp() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let a = FormItem(key: "A", value: "", sortOrder: 0)
+        let b = FormItem(key: "B", value: "", sortOrder: 1)
+        let c = FormItem(key: "C", value: "", sortOrder: 2)
+        [a, b, c].forEach { context.insert($0) }
+        try context.save()
+
+        var list = [a, b, c]
+        applyMove(to: &list, from: IndexSet(integer: 1), to: 0) { $0.sortOrder = $1 }
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)]))
+        #expect(fetched.map(\.key) == ["B", "A", "C"])
+        #expect(fetched.map(\.sortOrder) == [0, 1, 2])
+    }
+
+    @Test("sortOrders are always contiguous after move")
+    func sortOrdersAreContiguous() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let items = (0..<5).map { i in
+            let item = FormItem(key: "\(i)", value: "", sortOrder: i)
+            context.insert(item)
+            return item
+        }
+        try context.save()
+
+        var list = items
+        applyMove(to: &list, from: IndexSet(integer: 4), to: 1) { $0.sortOrder = $1 }
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<FormItem>(sortBy: [SortDescriptor(\.sortOrder)]))
+        #expect(fetched.map(\.sortOrder) == [0, 1, 2, 3, 4])
+    }
+
+    // MARK: Folder reordering
+
+    @Test("folders reordered — sortOrders reassigned correctly")
+    func foldersReordered() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let work = Folder(name: "Work", sortOrder: 0)
+        let personal = Folder(name: "Personal", sortOrder: 1)
+        let other = Folder(name: "Other", sortOrder: 2)
+        [work, personal, other].forEach { context.insert($0) }
+        try context.save()
+
+        var list = [work, personal, other]
+        applyMove(to: &list, from: IndexSet(integer: 2), to: 0) { $0.sortOrder = $1 }
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Folder>(sortBy: [SortDescriptor(\.sortOrder)]))
+        #expect(fetched.map(\.name) == ["Other", "Work", "Personal"])
+        #expect(fetched.map(\.sortOrder) == [0, 1, 2])
     }
 }

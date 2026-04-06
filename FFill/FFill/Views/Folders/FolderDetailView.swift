@@ -29,6 +29,7 @@ struct FolderDetailView: View {
                     }
             }
             .onDelete(perform: deleteItems)
+            .onMove(perform: moveItems)
         }
         .navigationTitle(folder.name)
         .overlay {
@@ -47,5 +48,13 @@ struct FolderDetailView: View {
 
     private func deleteItems(at indexSet: IndexSet) {
         indexSet.forEach { context.delete(sortedItems[$0]) }
+    }
+
+    private func moveItems(from source: IndexSet, to destination: Int) {
+        var reordered = sortedItems
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, item) in reordered.enumerated() {
+            item.sortOrder = index
+        }
     }
 }

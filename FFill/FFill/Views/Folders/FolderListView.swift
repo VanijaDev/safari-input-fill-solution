@@ -28,6 +28,7 @@ struct FolderListView: View {
                 }
             }
             .onDelete(perform: deleteFolders)
+            .onMove(perform: moveFolders)
         }
         .navigationTitle("Folders")
         .navigationDestination(for: Folder.self) { folder in
@@ -59,5 +60,13 @@ struct FolderListView: View {
 
     private func deleteFolders(at indexSet: IndexSet) {
         indexSet.forEach { context.delete(folders[$0]) }
+    }
+
+    private func moveFolders(from source: IndexSet, to destination: Int) {
+        var reordered = folders
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, folder) in reordered.enumerated() {
+            folder.sortOrder = index
+        }
     }
 }
