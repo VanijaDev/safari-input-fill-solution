@@ -14,6 +14,7 @@ struct FolderListView: View {
 
     @State private var showingAddSheet = false
     @State private var folderToEdit: Folder? = nil
+    @State private var folderToDelete: Folder? = nil
 
     var body: some View {
         List {
@@ -24,7 +25,7 @@ struct FolderListView: View {
                 .contextMenu {
                     Button("Edit") { folderToEdit = folder }
                     Divider()
-                    Button("Delete", role: .destructive) { context.delete(folder) }
+                    Button("Delete", role: .destructive) { folderToDelete = folder }
                 }
             }
             .onDelete(perform: deleteFolders)
@@ -55,6 +56,16 @@ struct FolderListView: View {
         }
         .sheet(item: $folderToEdit) { folder in
             NavigationStack { FolderEditorView(folder: folder) }
+        }
+        .alert("Delete \"\(folderToDelete?.name ?? "")\"?",
+               isPresented: Binding(get: { folderToDelete != nil }, set: { if !$0 { folderToDelete = nil } })) {
+            Button("Delete", role: .destructive) {
+                if let folder = folderToDelete { context.delete(folder) }
+                folderToDelete = nil
+            }
+            Button("Cancel", role: .cancel) { folderToDelete = nil }
+        } message: {
+            Text("Items in this folder will be unassigned, not deleted.")
         }
     }
 

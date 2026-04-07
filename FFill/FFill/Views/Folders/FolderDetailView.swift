@@ -13,6 +13,7 @@ struct FolderDetailView: View {
     let folder: Folder
 
     @State private var itemToEdit: FormItem? = nil
+    @State private var itemToDelete: FormItem? = nil
 
     private var sortedItems: [FormItem] {
         folder.items.sorted { $0.sortOrder < $1.sortOrder }
@@ -25,7 +26,7 @@ struct FolderDetailView: View {
                     .contextMenu {
                         Button("Edit") { itemToEdit = item }
                         Divider()
-                        Button("Delete", role: .destructive) { context.delete(item) }
+                        Button("Delete", role: .destructive) { itemToDelete = item }
                     }
             }
             .onDelete(perform: deleteItems)
@@ -43,6 +44,16 @@ struct FolderDetailView: View {
         }
         .sheet(item: $itemToEdit) { item in
             NavigationStack { FormItemEditorView(item: item) }
+        }
+        .alert("Delete \"\(itemToDelete?.key ?? "")\"?",
+               isPresented: Binding(get: { itemToDelete != nil }, set: { if !$0 { itemToDelete = nil } })) {
+            Button("Delete", role: .destructive) {
+                if let item = itemToDelete { context.delete(item) }
+                itemToDelete = nil
+            }
+            Button("Cancel", role: .cancel) { itemToDelete = nil }
+        } message: {
+            Text("This action cannot be undone.")
         }
     }
 

@@ -151,6 +151,22 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     }).catch(err => console.error("FFill: sendMessage to content.js failed", err));
 });
 
+// ── Popup refresh message ─────────────────────────────────────────────────────
+
+// The toolbar popup sends { action: "refresh" } after the user adds/edits data
+// in the macOS app. We re-fetch from native and rebuild the context menus.
+browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.action !== "refresh") return;
+
+    fetchFormData().then(() => {
+        sendResponse({ success: true, itemCount: formData.items.length });
+    }).catch(() => {
+        sendResponse({ success: false });
+    });
+
+    return true; // keep message channel open for async sendResponse
+});
+
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 // Fetch fresh data from native on first install and each Safari startup.

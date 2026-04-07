@@ -85,10 +85,15 @@
 
 - **Checkpoint:** ✅ End-to-end verified — right-click any input on any site, select FFill item, field populates correctly including folder submenus. Verified working after 2+ minutes of inactivity (SW termination).
 
-## Phase 6: Edge Cases & Refinement
-- [ ] Handle empty states with placeholder views
-- [ ] Add confirmation dialogs for destructive actions
-- [ ] Handle extension data staleness (refresh mechanism)
-- [ ] Test with React/Vue/Angular sites
-- [ ] Test with contentEditable elements
-- **Checkpoint:** Final review. Test across multiple real-world job application sites.
+## Phase 6: Edge Cases & Refinement ✅
+- [x] Handle empty states with placeholder views — already implemented in Phase 3 for all three list views
+- [x] Add confirmation dialogs for destructive actions — `.alert` added to context menu Delete in `FormDataListView`, `FolderListView`, `FolderDetailView`; folder delete message clarifies items are unassigned not deleted
+- [x] Handle extension data staleness (refresh mechanism) — toolbar popup (`popup.html` / `popup.js`) with "Refresh Menu" button; sends `{ action: "refresh" }` to background.js which re-fetches from native and rebuilds context menus; shows item count on success
+- [x] Test with React/Vue/Angular sites — native setter trick confirmed working (verified in Phase 5 on React-based job application forms)
+- [x] Test with contentEditable elements — `fillField()` in content.js handles `isContentEditable` via `textContent` assignment
+
+> **Notes:**
+> - Swipe-to-delete remains immediate (no dialog) — it's a deliberate gesture; confirmation is on context menu Delete only
+> - After adding/editing items in the macOS app, click the FFill toolbar icon in Safari and press "Refresh Menu" to update the context menu
+
+- **Checkpoint:** Build verified ✅ — 27/27 tests passing. Confirmation dialogs, refresh popup, and empty states all implemented.

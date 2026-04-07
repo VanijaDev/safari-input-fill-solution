@@ -14,6 +14,7 @@ struct FormDataListView: View {
 
     @State private var showingAddSheet = false
     @State private var itemToEdit: FormItem? = nil
+    @State private var itemToDelete: FormItem? = nil
 
     var body: some View {
         List {
@@ -22,7 +23,7 @@ struct FormDataListView: View {
                     .contextMenu {
                         Button("Edit") { itemToEdit = item }
                         Divider()
-                        Button("Delete", role: .destructive) { context.delete(item) }
+                        Button("Delete", role: .destructive) { itemToDelete = item }
                     }
             }
             .onDelete(perform: deleteItems)
@@ -50,6 +51,16 @@ struct FormDataListView: View {
         }
         .sheet(item: $itemToEdit) { item in
             NavigationStack { FormItemEditorView(item: item) }
+        }
+        .alert("Delete \"\(itemToDelete?.key ?? "")\"?",
+               isPresented: Binding(get: { itemToDelete != nil }, set: { if !$0 { itemToDelete = nil } })) {
+            Button("Delete", role: .destructive) {
+                if let item = itemToDelete { context.delete(item) }
+                itemToDelete = nil
+            }
+            Button("Cancel", role: .cancel) { itemToDelete = nil }
+        } message: {
+            Text("This action cannot be undone.")
         }
     }
 
