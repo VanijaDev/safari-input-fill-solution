@@ -100,3 +100,33 @@
 > - After "Delete All Data", also press "Refresh Menu" in the Safari popup to clear the extension's context menu cache
 
 - **Checkpoint:** Build verified ✅ — 30/30 tests passing. Confirmation dialogs, refresh popup, empty states, and delete-all implemented.
+
+---
+
+## Post-Phase 6 Improvements ✅
+
+### Value Text Alignment Fix
+- [x] Replaced `TextField("Value", axis: .vertical)` with `LabeledContent("Value") { TextEditor(...) }` in `FormItemEditorView` — macOS `.formStyle(.grouped)` overrides text alignment for multi-line `TextField`, whereas `TextEditor` is always left-aligned by default
+
+### Nested Folders (Sub-folder support)
+- [x] **`Folder.swift`** — added `parent: Folder?` and `@Relationship(deleteRule: .nullify, inverse: \Folder.parent) var children: [Folder]`; delete rule `.nullify` means deleting a parent makes its children root-level (matching items behavior); added `fullPath` computed property (e.g. "Work / Engineering") and `descendantIDs()` recursive helper for cycle prevention in parent picker
+- [x] **`FolderListView.swift`** — `@Query` filter changed to `#Predicate<Folder> { $0.parent == nil }` so only root-level folders appear at the top level
+- [x] **`FolderDetailView.swift`** — added "Sub-folders" section showing `folder.children` sorted by `sortOrder`, with NavigationLink drill-in, context menu Edit/Delete, `.onDelete`, `.onMove`; added "Add Sub-folder" toolbar button; removed duplicate `.navigationDestination(for: Folder.self)` that caused a SwiftUI conflict (root declaration in `FolderListView` covers the entire stack)
+- [x] **`FolderEditorView.swift`** — added parent folder `Picker` with `availableParents` computed property that excludes the editing folder and all its descendants (cycle prevention); pre-selects parent when opened via "Add Sub-folder"
+- [x] **`FormItemEditorView.swift`** — folder picker now shows `folder.fullPath` instead of `folder.name` so nested paths (e.g. "Work / Engineering") are visible
+- [x] **`ExtensionDataService.swift`** — folder serialization includes `parentId` for child folders; omitted entirely (not `null`) for root folders, matching the `folderId` pattern for items
+- [x] **`background.js`** — `buildMenus()` now separates root and child folders; new `createFolderMenu(folder, parentMenuId, items, allFolders)` recursively builds arbitrarily-deep context menu submenus sorted by `sortOrder`
+
+### FolderRowView Content Summary Fix
+- [x] **`FolderRowView.swift`** — replaced hard-coded `folder.items.count` with `contentSummary` computed property that shows "N sub-folder(s)", "N item(s)", or "N sub-folder(s), N item(s)" based on what's non-zero; fixes top-level folders showing "0" when they contain only sub-folders
+
+### Tests
+- [x] **`NestedFolderTests` suite** (8 tests) — child/parent relationships, delete-parent-nullifies-children, three-level nesting traversal, `fullPath`, `descendantIDs()`, `ExtensionDataService` parentId inclusion, folder-with-only-sub-folders model behavior
+- [x] **38/38 tests passing total**
+
+> **Notes:**
+> - SwiftData handles the new optional `parent`/`children` relationships as a lightweight migration — no versioned schema required
+> - `.navigationDestination(for: Folder.self)` must appear exactly once per `NavigationStack`; placing it in `FolderListView` covers all nested drill-in levels automatically
+> - The `fullPath` property walks up the `parent` chain recursively — keep nesting depth reasonable to avoid long menu labels
+
+- **Checkpoint:** Build verified ✅ — 38/38 tests passing. Nested folders, value alignment, and count summary all working end-to-end.

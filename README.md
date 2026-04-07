@@ -7,7 +7,7 @@ Built for people who repeatedly fill out the same forms (job applications, regis
 ## How It Works
 
 1. Open the **FFill** macOS app and save your data as key-value pairs (e.g., `First Name` = `John`).
-2. Organize items into **folders** (e.g., "Personal", "Work").
+2. Organize items into **folders** (e.g., "Personal", "Work") — folders can be nested inside each other.
 3. In **Safari**, right-click any input field.
 4. Select **FFill** from the context menu, pick a data item.
 5. The field is filled instantly.
@@ -188,7 +188,11 @@ Extension service worker starts
 | `id` | `UUID` | Unique identifier |
 | `name` | `String` | Folder name (e.g., "Personal") |
 | `sortOrder` | `Int` | Controls display order |
-| `items` | `[FormItem]` | Items in this folder (deleteRule: `.nullify`) |
+| `items` | `[FormItem]` | Items directly in this folder (deleteRule: `.nullify`) |
+| `parent` | `Folder?` | Optional parent folder; becomes `nil` when parent is deleted |
+| `children` | `[Folder]` | Sub-folders nested inside this folder (deleteRule: `.nullify`) |
+| `fullPath` | `String` | Computed — slash-separated path from root, e.g. "Work / Engineering" |
+| `descendantIDs()` | `Set<UUID>` | Recursive helper — all descendant folder IDs; used to prevent parent-picker cycles |
 | `createdAt` | `Date` | Creation timestamp |
 
 ### SharedContainer
@@ -208,8 +212,8 @@ Extension service worker starts
 
 ### background.js
 1. On startup: fetches all form data from native app via `browser.runtime.sendNativeMessage()`
-2. Caches items + folders in memory
-3. Builds context menu: "FFill" root → ungrouped items → separator → folder submenus
+2. Caches items + folders in `browser.storage.local` (survives service worker termination)
+3. Builds context menu: "FFill" root → ungrouped items → separator → folder submenus (arbitrarily nested via recursive `createFolderMenu()`)
 4. On menu click: sends `{ action: "fillField", value }` to content script
 
 ### content.js
@@ -240,10 +244,10 @@ FFillApp (@main, modelContainer: SharedContainer.modelContainer)
     │   ├── FormItemRowView (key + value preview + folder badge)
     │   └── FormItemEditorView (sheet: key, value, folder picker)
     │
-    ├── FolderListView (list + drag reorder + add/edit/delete)
-    │   ├── FolderRowView (name + item count)
-    │   ├── FolderEditorView (sheet: folder name)
-    │   └── FolderDetailView (items in folder, drag reorder)
+    ├── FolderListView (root-level folders only + drag reorder + add/edit/delete)
+    │   ├── FolderRowView (name + sub-folder/item count summary)
+    │   ├── FolderEditorView (sheet: folder name + parent folder picker with cycle prevention)
+    │   └── FolderDetailView (sub-folders section + items section, drag reorder each)
     │
     └── SettingsView (Delete All Data)
 ```
