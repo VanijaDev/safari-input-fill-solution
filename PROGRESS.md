@@ -85,15 +85,7 @@
 
 - **Checkpoint:** ✅ End-to-end verified — right-click any input on any site, select FFill item, field populates correctly including folder submenus. Verified working after 2+ minutes of inactivity (SW termination).
 
-## Phase 6: Settings & Polish
-- [ ] Build `SettingsView` with extension enable instructions
-- [ ] Add `SFSafariApplication.showPreferencesForExtension` button
-- [ ] Implement `ImportExportService` (JSON export/import)
-- [ ] **Tests:** Unit tests for ImportExportService (round-trip serialization)
-- [ ] Add app icon assets
-- **Checkpoint:** Export data, delete all items, re-import, verify everything restored.
-
-## Phase 7: Edge Cases & Refinement
+## Phase 6: Edge Cases & Refinement
 - [ ] Handle empty states with placeholder views
 - [ ] Add confirmation dialogs for destructive actions
 - [ ] Handle extension data staleness (refresh mechanism)

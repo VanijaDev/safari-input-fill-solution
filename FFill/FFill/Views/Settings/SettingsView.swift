@@ -11,8 +11,7 @@ struct SettingsView: View {
     var body: some View {
         ContentUnavailableView(
             "Settings",
-            systemImage: "gear",
-            description: Text("Extension setup and import/export coming in Phase 6.")
+            systemImage: "gear"
         )
         .navigationTitle("Settings")
     }

@@ -155,9 +155,6 @@ FFillApp (@main, modelContainer: SharedContainer.modelContainer)
     │   └── FolderDetailView (items in folder, drag reorder)
     │
     └── SettingsView
-        ├── Extension enable instructions
-        ├── "Open Safari Extension Preferences" button
-        └── Import/Export (JSON)
 ```
 
 ---
@@ -189,8 +186,7 @@ FFill/
 │   │   │   └── FolderDetailView.swift
 │   │   └── Settings/SettingsView.swift
 │   └── Utilities/
-│       ├── Constants.swift
-│       └── ImportExportService.swift
+│       └── Constants.swift
 │
 ├── FFill Extension/                    # Safari Web Extension target
 │   ├── Info.plist
@@ -203,9 +199,7 @@ FFill/
 │       └── images/
 │
 ├── FFillTests/                         # Unit tests
-│   ├── ModelTests.swift
-│   ├── ImportExportTests.swift
-│   └── ExtensionHandlerTests.swift
+│   └── FFillTests.swift
 │
 ├── PROGRESS.md
 └── USER_JOURNEY.md
@@ -215,6 +209,7 @@ FFill/
 - `Models/FormItem.swift`
 - `Models/Folder.swift`
 - `Models/SharedContainer.swift`
+- `Models/ExtensionDataService.swift`
 - `Utilities/Constants.swift`
 
 ---
@@ -223,9 +218,8 @@ FFill/
 
 | Layer | Framework | What's Tested |
 |-------|-----------|---------------|
-| SwiftData models | XCTest | CRUD operations, relationships, sortOrder recalculation |
-| ImportExportService | XCTest | JSON round-trip serialization, edge cases |
-| SafariWebExtensionHandler | XCTest | Mock NSExtensionContext, verify response format |
+| SwiftData models | Swift Testing | CRUD operations, relationships, sortOrder recalculation |
+| ExtensionDataService | Swift Testing | JSON serialization, sortOrder, folder relationships |
 | background.js | Manual / Jest | Context menu tree construction from data |
 | content.js | Manual / Jest | Field filling, event dispatch, framework compat |
 
@@ -242,8 +236,7 @@ Development is **gradual** — each phase is implemented, reviewed, and verified
 | 3 | App UI (CRUD) | Full form data and folder management UI |
 | 4 | Drag-and-Drop | Reordering items and folders with persistent sort order |
 | 5 | Safari Extension | Context menu + field filling, end-to-end working |
-| 6 | Settings & Polish | Import/export, extension instructions, app icons |
-| 7 | Edge Cases | Empty states, framework compat, data refresh |
+| 6 | Edge Cases | Empty states, framework compat, data refresh |
 
 ---
 
@@ -269,23 +262,3 @@ Both targets require the same App Groups entitlement:
 
 ---
 
-## Import/Export Format
-
-```json
-{
-    "version": 1,
-    "folders": [
-        { "id": "uuid", "name": "Personal", "sortOrder": 0 }
-    ],
-    "items": [
-        {
-            "id": "uuid",
-            "key": "First Name",
-            "value": "John",
-            "sortOrder": 0,
-            "isRichText": false,
-            "folderId": "uuid-or-null"
-        }
-    ]
-}
-```
