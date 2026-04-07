@@ -72,7 +72,7 @@
 - [x] Write `background.js` — fetches native data on `onInstalled`/`onStartup`; builds context menu tree (FFill root → ungrouped items → separator → folder submenus); sends `fillField` to content.js on click
 - [x] Write `content.js` — tracks right-clicked element via `contextmenu` event; fills using native setter trick (`Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set`) for React/Vue/Angular compatibility; dispatches `input` + `change` events
 - [x] **Tests:** 6 new `ExtensionDataServiceTests` — empty store, ungrouped items (no folderId key), sortOrder, folderId presence, folder itemIds order, multi-folder sort — 27/27 passing total
-- [ ] **Tests:** JS tests for background.js / content.js (require external test runner — deferred to Phase 7)
+- [ ] **Tests:** JS tests for background.js / content.js (require external test runner such as Jest — not planned)
 
 > **Notes:**
 > - `ExtensionDataService.swift` must have target membership on both `FFill` and `FFill Extension` — without this the extension won't compile
@@ -91,9 +91,12 @@
 - [x] Handle extension data staleness (refresh mechanism) — toolbar popup (`popup.html` / `popup.js`) with "Refresh Menu" button; sends `{ action: "refresh" }` to background.js which re-fetches from native and rebuilds context menus; shows item count on success
 - [x] Test with React/Vue/Angular sites — native setter trick confirmed working (verified in Phase 5 on React-based job application forms)
 - [x] Test with contentEditable elements — `fillField()` in content.js handles `isContentEditable` via `textContent` assignment
+- [x] Add "Delete All Data" button to `SettingsView` — destructive button with confirmation alert showing exact item/folder counts; disabled when store is already empty; deletes all `FormItem` and `Folder` records in one pass
+- [x] **Tests:** `SettingsTests` suite — delete all clears store, delete all with mixed data, button disabled when empty — 30/30 passing total
 
 > **Notes:**
 > - Swipe-to-delete remains immediate (no dialog) — it's a deliberate gesture; confirmation is on context menu Delete only
 > - After adding/editing items in the macOS app, click the FFill toolbar icon in Safari and press "Refresh Menu" to update the context menu
+> - After "Delete All Data", also press "Refresh Menu" in the Safari popup to clear the extension's context menu cache
 
-- **Checkpoint:** Build verified ✅ — 27/27 tests passing. Confirmation dialogs, refresh popup, and empty states all implemented.
+- **Checkpoint:** Build verified ✅ — 30/30 tests passing. Confirmation dialogs, refresh popup, empty states, and delete-all implemented.

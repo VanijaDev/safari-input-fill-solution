@@ -1,4 +1,4 @@
-# FFill
+F# FFill
 
 A macOS app + Safari Web Extension that speeds up form filling with preset, categorized data.
 
@@ -245,7 +245,7 @@ FFillApp (@main, modelContainer: SharedContainer.modelContainer)
     │   ├── FolderEditorView (sheet: folder name)
     │   └── FolderDetailView (items in folder, drag reorder)
     │
-    └── SettingsView
+    └── SettingsView (Delete All Data)
 ```
 
 ---
@@ -327,7 +327,7 @@ Development is **gradual** — each phase is implemented, reviewed, and verified
 | 3 | App UI (CRUD) | Full form data and folder management UI |
 | 4 | Drag-and-Drop | Reordering items and folders with persistent sort order |
 | 5 | Safari Extension | Context menu + field filling, end-to-end working |
-| 6 | Edge Cases | Empty states, framework compat, data refresh |
+| 6 | Edge Cases & Refinement | Confirmation dialogs, data refresh popup, empty states |
 
 ---
 

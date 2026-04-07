@@ -513,3 +513,67 @@ struct SortOrderReorderingTests {
         #expect(fetched.map(\.sortOrder) == [0, 1, 2])
     }
 }
+
+// MARK: - Delete All Data Tests
+
+/// Mirrors the deleteAllData() logic in SettingsView.
+private func deleteAllData(items: [FormItem], folders: [Folder], context: ModelContext) {
+    items.forEach { context.delete($0) }
+    folders.forEach { context.delete($0) }
+}
+
+@Suite("Delete All Data")
+struct DeleteAllDataTests {
+
+    @Test("deleting all items removes them from the store")
+    func deleteAllItems() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        [FormItem(key: "A", value: "1"), FormItem(key: "B", value: "2")].forEach { context.insert($0) }
+        try context.save()
+
+        let items = try context.fetch(FetchDescriptor<FormItem>())
+        deleteAllData(items: items, folders: [], context: context)
+        try context.save()
+
+        #expect(try context.fetch(FetchDescriptor<FormItem>()).isEmpty)
+    }
+
+    @Test("deleting all folders removes them from the store")
+    func deleteAllFolders() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        [Folder(name: "Work"), Folder(name: "Personal")].forEach { context.insert($0) }
+        try context.save()
+
+        let folders = try context.fetch(FetchDescriptor<Folder>())
+        deleteAllData(items: [], folders: folders, context: context)
+        try context.save()
+
+        #expect(try context.fetch(FetchDescriptor<Folder>()).isEmpty)
+    }
+
+    @Test("deleting all clears both items and folders in one pass")
+    func deleteAllMixedData() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let folder = Folder(name: "Work")
+        let item = FormItem(key: "Email", value: "w@work.com")
+        item.folder = folder
+        context.insert(folder)
+        context.insert(item)
+        context.insert(FormItem(key: "Phone", value: "+1 555 0000"))
+        try context.save()
+
+        let items = try context.fetch(FetchDescriptor<FormItem>())
+        let folders = try context.fetch(FetchDescriptor<Folder>())
+        deleteAllData(items: items, folders: folders, context: context)
+        try context.save()
+
+        #expect(try context.fetch(FetchDescriptor<FormItem>()).isEmpty)
+        #expect(try context.fetch(FetchDescriptor<Folder>()).isEmpty)
+    }
+}
