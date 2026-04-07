@@ -189,7 +189,9 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 
 // The toolbar popup sends { action: "refresh" } after the user adds/edits data
 // in the macOS app. We re-fetch from native and rebuild the context menus.
-browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // Only accept messages from this extension's own pages (popup)
+    if (sender.id !== browser.runtime.id) return;
     if (message?.action !== "refresh") return;
 
     fetchFormData().then(() => {
