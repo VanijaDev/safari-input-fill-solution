@@ -10,7 +10,8 @@ import SwiftData
 
 struct FolderListView: View {
     @Environment(\.modelContext) private var context
-    @Query(sort: \Folder.sortOrder) private var folders: [Folder]
+    @Query(filter: #Predicate<Folder> { $0.parent == nil }, sort: \Folder.sortOrder)
+    private var rootFolders: [Folder]
 
     @State private var showingAddSheet = false
     @State private var folderToEdit: Folder? = nil
@@ -18,7 +19,7 @@ struct FolderListView: View {
 
     var body: some View {
         List {
-            ForEach(folders) { folder in
+            ForEach(rootFolders) { folder in
                 NavigationLink(value: folder) {
                     FolderRowView(folder: folder)
                 }
@@ -36,7 +37,7 @@ struct FolderListView: View {
             FolderDetailView(folder: folder)
         }
         .overlay {
-            if folders.isEmpty {
+            if rootFolders.isEmpty {
                 ContentUnavailableView(
                     "No Folders",
                     systemImage: "folder",
@@ -65,16 +66,16 @@ struct FolderListView: View {
             }
             Button("Cancel", role: .cancel) { folderToDelete = nil }
         } message: {
-            Text("Items in this folder will be unassigned, not deleted.")
+            Text("Items will be unassigned. Sub-folders will become top-level folders.")
         }
     }
 
     private func deleteFolders(at indexSet: IndexSet) {
-        indexSet.forEach { context.delete(folders[$0]) }
+        indexSet.forEach { context.delete(rootFolders[$0]) }
     }
 
     private func moveFolders(from source: IndexSet, to destination: Int) {
-        var reordered = folders
+        var reordered = rootFolders
         reordered.move(fromOffsets: source, toOffset: destination)
         for (index, folder) in reordered.enumerated() {
             folder.sortOrder = index

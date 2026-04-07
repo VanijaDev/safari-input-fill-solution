@@ -45,12 +45,17 @@ enum ExtensionDataService {
 
         let foldersJSON: [[String: Any]] = folders.map { folder in
             let sortedItems = folder.items.sorted { $0.sortOrder < $1.sortOrder }
-            return [
+            var dict: [String: Any] = [
                 "id": folder.id.uuidString,
                 "name": folder.name,
                 "sortOrder": folder.sortOrder,
                 "itemIds": sortedItems.map { $0.id.uuidString }
             ]
+            // Omit parentId entirely when root-level — JS treats undefined as falsy
+            if let parentID = folder.parent?.id.uuidString {
+                dict["parentId"] = parentID
+            }
+            return dict
         }
 
         return [

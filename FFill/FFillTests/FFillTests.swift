@@ -514,7 +514,134 @@ struct SortOrderReorderingTests {
     }
 }
 
-// MARK: - Delete All Data Tests
+// MARK: - Nested Folder Tests
+
+@Suite("Nested Folders")
+struct NestedFolderTests {
+
+    @Test("child folder has correct parent after creation")
+    func childHasParent() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let parent = Folder(name: "Work")
+        let child = Folder(name: "Engineering", parent: parent)
+        context.insert(parent)
+        context.insert(child)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Folder>())
+        let fetchedChild = try #require(fetched.first { $0.name == "Engineering" })
+        #expect(fetchedChild.parent?.name == "Work")
+    }
+
+    @Test("parent folder contains child in children array")
+    func parentContainsChild() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let parent = Folder(name: "Work")
+        let child = Folder(name: "Engineering", parent: parent)
+        context.insert(parent)
+        context.insert(child)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Folder>())
+        let fetchedParent = try #require(fetched.first { $0.name == "Work" })
+        #expect(fetchedParent.children.count == 1)
+        #expect(fetchedParent.children[0].name == "Engineering")
+    }
+
+    @Test("deleting parent nullifies children's parent reference")
+    func deleteParentNullifiesChildren() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let parent = Folder(name: "Work")
+        let child = Folder(name: "Engineering", parent: parent)
+        context.insert(parent)
+        context.insert(child)
+        try context.save()
+
+        context.delete(parent)
+        try context.save()
+
+        let folders = try context.fetch(FetchDescriptor<Folder>())
+        #expect(folders.count == 1)
+        #expect(folders[0].name == "Engineering")
+        #expect(folders[0].parent == nil)
+    }
+
+    @Test("three-level nesting is traversable")
+    func threeLevelNesting() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let root = Folder(name: "Root")
+        let mid = Folder(name: "Mid", parent: root)
+        let leaf = Folder(name: "Leaf", parent: mid)
+        context.insert(root)
+        context.insert(mid)
+        context.insert(leaf)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Folder>())
+        let fetchedLeaf = try #require(fetched.first { $0.name == "Leaf" })
+        #expect(fetchedLeaf.parent?.name == "Mid")
+        #expect(fetchedLeaf.parent?.parent?.name == "Root")
+    }
+
+    @Test("fullPath returns correct slash-separated string")
+    func fullPath() {
+        let root = Folder(name: "Work")
+        let child = Folder(name: "Engineering", parent: root)
+        let grandchild = Folder(name: "Backend", parent: child)
+
+        #expect(root.fullPath == "Work")
+        #expect(child.fullPath == "Work / Engineering")
+        #expect(grandchild.fullPath == "Work / Engineering / Backend")
+    }
+
+    @Test("descendantIDs collects all recursive descendants")
+    func descendantIDs() {
+        let root = Folder(name: "Root")
+        let child1 = Folder(name: "Child1", parent: root)
+        let child2 = Folder(name: "Child2", parent: root)
+        let grandchild = Folder(name: "Grandchild", parent: child1)
+        root.children = [child1, child2]
+        child1.children = [grandchild]
+
+        let ids = root.descendantIDs()
+        #expect(ids.contains(child1.id))
+        #expect(ids.contains(child2.id))
+        #expect(ids.contains(grandchild.id))
+        #expect(!ids.contains(root.id))
+    }
+
+    @Test("ExtensionDataService: root folder omits parentId, child folder includes it")
+    func extensionServiceParentId() throws {
+        let container = try makeTestContainer()
+        let context = ModelContext(container)
+
+        let parent = Folder(name: "Work", sortOrder: 0)
+        let child = Folder(name: "Engineering", sortOrder: 0, parent: parent)
+        context.insert(parent)
+        context.insert(child)
+        try context.save()
+
+        let payload = try ExtensionDataService.buildResponsePayload(using: container)
+        let folders = try #require(payload["folders"] as? [[String: Any]])
+
+        let rootJSON = try #require(folders.first { $0["name"] as? String == "Work" })
+        let childJSON = try #require(folders.first { $0["name"] as? String == "Engineering" })
+
+        #expect(rootJSON["parentId"] == nil)
+        let parentId = try #require(childJSON["parentId"] as? String)
+        #expect(parentId == parent.id.uuidString)
+    }
+}
+
+    @Test(\"folder with only sub-folders has zero direct items but non-zero children count\")\n    func folderWithOnlySubFoldersHasNoDirectItems() throws {\n        let container = try makeTestContainer()\n        let context = ModelContext(container)\n\n        let parent = Folder(name: \"Work\")\n        let child = Folder(name: \"Engineering\", parent: parent)\n        // Add an item to the child, not the parent\n        let item = FormItem(key: \"Work Email\", value: \"w@work.com\")\n        item.folder = child\n        context.insert(parent)\n        context.insert(child)\n        context.insert(item)\n        try context.save()\n\n        let fetched = try context.fetch(FetchDescriptor<Folder>())\n        let fetchedParent = try #require(fetched.first { $0.name == \"Work\" })\n\n        // Parent has children but no direct items — mirrors what FolderRowView uses\n        #expect(fetchedParent.children.count == 1)\n        #expect(fetchedParent.items.count == 0)\n        #expect(fetchedParent.children[0].items.count == 1)\n    }\n}\n\n// MARK: - Delete All Data Tests
 
 /// Mirrors the deleteAllData() logic in SettingsView.
 private func deleteAllData(items: [FormItem], folders: [Folder], context: ModelContext) {

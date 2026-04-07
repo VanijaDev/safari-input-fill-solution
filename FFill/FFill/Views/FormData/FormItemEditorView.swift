@@ -46,7 +46,7 @@ struct FormItemEditorView: View {
                 Picker("Folder", selection: $selectedFolderID) {
                     Text("None").tag(Optional<UUID>.none)
                     ForEach(folders) { folder in
-                        Text(folder.name).tag(Optional(folder.id))
+                        Text(folder.fullPath).tag(Optional(folder.id))
                     }
                 }
                 Toggle("Rich Text", isOn: $isRichText)

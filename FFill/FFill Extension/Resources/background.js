@@ -7,7 +7,7 @@
 //        FFill (root)
 //          ├── ungrouped items (no folder)
 //          ├── ── separator (if both ungrouped items and folders exist)
-//          └── folder submenus → their items
+//          └── root folder submenus → their items → nested sub-folder submenus (recursive)
 //   4. On context menu item click, restore data from storage if the SW was terminated,
 //      then send { action: "fillField", value } to the active tab's content.js.
 //
@@ -95,7 +95,8 @@ function buildMenus() {
     }
 
     // Separator between ungrouped items and folders (only when both exist)
-    if (ungrouped.length > 0 && folders.length > 0) {
+    const rootFolders = folders.filter(f => !f.parentId);
+    if (ungrouped.length > 0 && rootFolders.length > 0) {
         browser.contextMenus.create({
             id: "ffill-sep",
             parentId: "ffill-root",
@@ -104,25 +105,58 @@ function buildMenus() {
         });
     }
 
-    // Folder submenus, each containing their items in sortOrder
-    for (const folder of folders) {
+    // Build root-level folder submenus; children are built recursively inside
+    for (const folder of rootFolders) {
+        createFolderMenu(folder, "ffill-root", items, folders);
+    }
+}
+
+/**
+ * Recursively creates a folder submenu:
+ *   1. The folder itself as a submenu item
+ *   2. Items belonging to this folder
+ *   3. A separator (if the folder has both items and sub-folders)
+ *   4. Child folder submenus, each built recursively
+ */
+function createFolderMenu(folder, parentMenuId, items, allFolders) {
+    const menuId = `ffill-folder-${folder.id}`;
+
+    browser.contextMenus.create({
+        id: menuId,
+        parentId: parentMenuId,
+        title: folder.name,
+        contexts: ["editable"]
+    });
+
+    // Items belonging directly to this folder, in sortOrder
+    for (const itemId of folder.itemIds) {
+        const item = items.find(i => i.id === itemId);
+        if (!item) continue;
         browser.contextMenus.create({
-            id: `ffill-folder-${folder.id}`,
-            parentId: "ffill-root",
-            title: folder.name,
+            id: `ffill-item-${item.id}`,
+            parentId: menuId,
+            title: item.key,
             contexts: ["editable"]
         });
+    }
 
-        for (const itemId of folder.itemIds) {
-            const item = items.find(i => i.id === itemId);
-            if (!item) continue;
-            browser.contextMenus.create({
-                id: `ffill-item-${item.id}`,
-                parentId: `ffill-folder-${folder.id}`,
-                title: item.key,
-                contexts: ["editable"]
-            });
-        }
+    // Child folders sorted by sortOrder
+    const children = allFolders
+        .filter(f => f.parentId === folder.id)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+    // Separator between items and sub-folders when both exist
+    if (folder.itemIds.length > 0 && children.length > 0) {
+        browser.contextMenus.create({
+            id: `ffill-sep-${folder.id}`,
+            parentId: menuId,
+            type: "separator",
+            contexts: ["editable"]
+        });
+    }
+
+    for (const child of children) {
+        createFolderMenu(child, menuId, items, allFolders);
     }
 }
 
