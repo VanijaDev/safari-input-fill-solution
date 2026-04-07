@@ -1,8 +1,8 @@
-F# FFill
+## FFill
 
 A macOS app + Safari Web Extension that speeds up form filling with preset, categorized data.
 
-Inspired by [SimpleFill](https://simplefillapp.com/). Built for people who repeatedly fill out the same forms (job applications, registrations, etc.) and want a faster way to insert saved data via Safari's right-click context menu.
+Built for people who repeatedly fill out the same forms (job applications, registrations, etc.) and want a faster way to insert saved data via Safari's right-click context menu.
 
 ## How It Works
 
