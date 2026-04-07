@@ -14,6 +14,97 @@ Inspired by [SimpleFill](https://simplefillapp.com/). Built for people who repea
 
 See [USER_JOURNEY.md](USER_JOURNEY.md) for the complete usage guide.
 
+---
+
+## Getting Started (for new users)
+
+> **Requirements:** macOS 26 (Tahoe) or later · Xcode 26 or later · A free Apple ID (no paid developer account needed)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/safari-input-fill-solution.git
+cd safari-input-fill-solution/FFill
+open FFill.xcodeproj
+```
+
+### 2. Choose your own identifiers
+
+The project ships with the original author's bundle IDs. You must replace them with your own before building — Xcode signing requires each developer to use a unique identifier tied to their Apple ID.
+
+Pick a reverse-domain prefix, e.g. `com.yourname` or `io.yourname`. You'll use it in three places:
+
+**a) `FFill/Utilities/Constants.swift`** — change the App Group ID:
+```swift
+// Before:
+static let appGroupID = "group.vanija-dev.FFill"
+
+// After (use your own prefix):
+static let appGroupID = "group.yourname.FFill"
+```
+
+**b) Xcode project settings** — change the Bundle Identifier for both targets:
+
+| Target | Original | Change to |
+|--------|----------|-----------|
+| FFill | `vanija-dev.FFill` | `yourname.FFill` |
+| FFill Extension | `vanija-dev.FFill.Extension` | `yourname.FFill.Extension` |
+
+To update: select the project in the navigator → click each target → **General** tab → change **Bundle Identifier**.
+
+**c) Both entitlement files** — update the App Group ID to match step (a):
+
+- `FFill/FFill.entitlements`
+- `FFill Extension/FFill Extension.entitlements`
+
+In each file, change:
+```xml
+<string>group.vanija-dev.FFill</string>
+```
+to:
+```xml
+<string>group.yourname.FFill</string>
+```
+
+### 3. Configure signing
+
+1. In Xcode, select the **FFill** project in the navigator
+2. For **each target** (FFill and FFill Extension):
+   - Go to **Signing & Capabilities** tab
+   - Check **Automatically manage signing**
+   - Set **Team** to your Apple ID (add it via Xcode → Settings → Accounts if needed)
+3. Xcode will create a free provisioning profile automatically
+
+> A free Apple ID is sufficient for running the app on your own Mac. You do **not** need a paid Apple Developer account.
+
+### 4. Add the App Group entitlement
+
+Because you changed the App Group ID, Xcode needs to register it:
+
+1. Select the **FFill** target → **Signing & Capabilities**
+2. If **App Groups** capability is missing, click **+** and add it
+3. Set the group to `group.yourname.FFill` (your prefix from step 2a)
+4. Repeat for the **FFill Extension** target
+
+### 5. Build and run
+
+1. Select the **FFill** scheme and **My Mac** as the destination
+2. Press **Cmd+R** to build and run
+
+### 6. Enable the extension in Safari
+
+1. Open **Safari → Settings → Extensions**
+2. Enable **FFill**
+3. Under **"Allow FFill to read and alter webpages"** → select **Allow on All Websites**
+
+### 7. Use it
+
+1. Add items in the FFill app (name, email, address, etc.)
+2. In Safari, right-click any input field → **FFill** → select an item
+3. After adding new items, click the FFill toolbar icon and press **Refresh Menu**
+
+---
+
 ## Documentation
 
 | File | Purpose |
