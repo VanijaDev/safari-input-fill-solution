@@ -4,6 +4,12 @@ A macOS app + Safari Web Extension that speeds up form filling with preset, cate
 
 Built for people who repeatedly fill out the same forms (job applications, registrations, etc.) and want a faster way to insert saved data via Safari's right-click context menu.
 
+<img src="https://github.com/user-attachments/assets/3a3aa612-e8ed-41f7-a158-b480c7307ddb" width="500" height="500" alt="Add item"/>
+<img src="https://github.com/user-attachments/assets/8874fc01-057e-4235-be56-6a464583a528" width="500" height="500" alt="Add folder"/>
+<img src="https://github.com/user-attachments/assets/3294b50a-629d-4312-8c15-eb0c786deb9f" width="500" height="500" alt="Item to folder"/>
+<img src="https://github.com/user-attachments/assets/beea3020-c26d-4ba3-90ca-7d0a4e8f6042" width="500" alt="Ffill usage"/>
+
+
 ## How It Works
 
 1. Open the **FFill** macOS app and save your data as key-value pairs (e.g., `First Name` = `John`).
